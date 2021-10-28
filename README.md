@@ -1,10 +1,10 @@
-# tweet_scraper
+# tweet-scraper
 
 Used to search twitter by query or a specific users Twitter timeline.
 
 ## Getting Started
 
-To use `twitter-scraper` to search Twitter you will need to have a Twitter account, but you will also need to generate some keys to post to twitter. To do this, you will need to create a Twitter Application.
+To use `tweet-scraper` to search Twitter you will need to have a Twitter account, but you will also need to generate some keys to post to twitter. To do this, you will need to create a Twitter Application.
 
 The first step is to visit https://dev.twitter.com/apps/new and create a new Twitter application. When you create a new Twitter application you will need to provide the required information.
 
@@ -35,17 +35,17 @@ You will use this project either via the command line or a Python package.
 ### Command Line
 
 ```
-twitter-scraper --consumer_key {some value} --consumer_secret {some value} --access_token_key {some value} --access_token_secret {some value} get_user_tweets --screen_name 'MSAdministrator'
+tweet-scraper --consumer_key {some value} --consumer_secret {some value} --access_token_key {some value} --access_token_secret {some value} get_user_tweets --screen_name 'MSAdministrator'
 
-twitter-scraper --consumer_key {some value} --consumer_secret {some value} --access_token_key {some value} --access_token_secret {some value} query
+tweet-scraper --consumer_key {some value} --consumer_secret {some value} --access_token_key {some value} --access_token_secret {some value} query
 ```
 
 ### Package
 
 ```python
-from twitter_scraper import TwitterScraper
+from tweetscraper import TweetScraper
 
-ts = TwitterScraper(
+ts = TweetScraper(
     consumer_key={some value},
     consumer_secret={some value},
     access_token_key={some value},
