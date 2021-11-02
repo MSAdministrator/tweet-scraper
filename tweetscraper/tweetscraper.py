@@ -81,37 +81,59 @@ class TweetScraper:
             list: Returns a list of tweets and different properties of each tweet.
         """
         return_list = []
-        for tweet in tweepy.Cursor(self.api.user_timeline,
+        pages = 1
+        if count >= 200:
+            pages = int(count / 200) + 1
+        
+        for page in tweepy.Cursor(
+            self.api.user_timeline,
             screen_name=screen_name,
             count=count,
             since_id=None if not since_id else since_id,
             tweet_mode=tweet_mode,
-            include_rts=include_rts).items():
-            return_dict = {
-                'id': tweet.id,
-                'text': self.on_status(tweet)
-            }
-            
-            tag_list = []
-            for tag in tweet.entities['hashtags']:
-                tag_list.append(tag['text'])
-            return_dict.update({'tags': tag_list})
-            
-            url_list = []
-            expanded_url_list = []
-            try:
-                for url in tweet.retweeted_status.entities['urls']:
-                    return_dict['text'] = return_dict['text'].replace(url['url'], url['expanded_url'])
-                    url_list.append(url['url'])
-                    expanded_url_list.append(url['expanded_url'])
-            except:
-                pass
-            return_dict.update({
-                'urls': url_list,
-                'expanded_urls': expanded_url_list,
-                'extracted_urls': self._extract_urls(return_dict['text'])
-            })
-            return_list.append(return_dict)
+            include_rts=include_rts).pages(pages):
+            for tweet in page:
+                return_dict = {
+                    'id': tweet.id,
+                    'text': self.on_status(tweet)
+                }
+                
+                tag_list = []
+                for tag in tweet.entities['hashtags']:
+                    tag_list.append(tag['text'])
+                return_dict.update({'tags': tag_list})
+                
+                url_list = []
+                expanded_url_list = []
+                if hasattr(tweet, 'retweeted_status'):
+                    try:
+                        for url in tweet.retweeted_status.entities['urls']:
+                            return_dict['tweet_text'] = return_dict['text'].replace(url['url'], url['expanded_url'])
+                            url_list.append(url['url'])
+                            expanded_url_list.append(url['expanded_url'])
+                    except:
+                        pass
+                else:
+                    try:
+                        for url in tweet.entities['urls']:
+                            return_dict['tweet_text'] = return_dict['tweet_text'].replace(
+                                url['url'], url['expanded_url'])
+                            url_list.append(url['url'])
+                            expanded_url_list.append(url['expanded_url'])
+                    except:
+                        pass
+                source_location = None
+                try:
+                    source_location = f"https://twitter.com/{tweet.user.screen_name}/status/{tweet.id_str}"
+                except:
+                    pass
+                return_dict.update({
+                    'source_location': source_location,
+                    'urls': url_list,
+                    'expanded_urls': expanded_url_list,
+                    'extracted_urls': self._extract_urls(return_dict['tweet_text'])
+                })
+                return_list.append(return_dict)
         return return_list
 
     def query(self, query="#opendir OR #phishkit OR #phishingkit", count=100, since_id=None, until=None):
@@ -127,7 +149,10 @@ class TweetScraper:
             list: Returns a list of tweets and different properties of each tweet.
         """
         return_list = []
-        for tweet in tweepy.Cursor(self.api.search,
+        pages = 1
+        if count >= 200:
+            pages = int(count / 200) + 1
+        for page in tweepy.Cursor(self.api.search,
                            q=query,
                            count=count,
                            result_type="recent",
@@ -135,30 +160,47 @@ class TweetScraper:
                            lang="en",
                            since_id=None if not since_id else since_id,
                            until=None if not until else until,
-                           tweet_mode="extended").items():
-            return_dict = {
-                'id': tweet.id,
-                'text': self.on_status(tweet)
-            }
-            
-            tag_list = []
-            for tag in tweet.entities['hashtags']:
-                tag_list.append(tag['text'])
-            return_dict.update({'tags': tag_list})
-            
-            url_list = []
-            expanded_url_list = []
-            try:
-                for url in tweet.retweeted_status.entities['urls']:
-                    return_dict['text'] = return_dict['text'].replace(url['url'], url['expanded_url'])
-                    url_list.append(url['url'])
-                    expanded_url_list.append(url['expanded_url'])
-            except:
-                pass
-            return_dict.update({
-                'urls': url_list,
-                'expanded_urls': expanded_url_list,
-                'extracted_urls': self._extract_urls(return_dict['text'])
-            })
-            return_list.append(return_dict)
+                           tweet_mode="extended").pages(pages):
+            for tweet in page:
+                return_dict = {
+                    'id': tweet.id,
+                    'text': self.on_status(tweet)
+                }
+                
+                tag_list = []
+                for tag in tweet.entities['hashtags']:
+                    tag_list.append(tag['text'])
+                return_dict.update({'tags': tag_list})
+                
+                url_list = []
+                expanded_url_list = []
+                if hasattr(tweet, 'retweeted_status'):
+                    try:
+                        for url in tweet.retweeted_status.entities['urls']:
+                            return_dict['tweet_text'] = return_dict['text'].replace(url['url'], url['expanded_url'])
+                            url_list.append(url['url'])
+                            expanded_url_list.append(url['expanded_url'])
+                    except:
+                        pass
+                else:
+                    try:
+                        for url in tweet.entities['urls']:
+                            return_dict['tweet_text'] = return_dict['tweet_text'].replace(
+                                url['url'], url['expanded_url'])
+                            url_list.append(url['url'])
+                            expanded_url_list.append(url['expanded_url'])
+                    except:
+                        pass
+                source_location = None
+                try:
+                    source_location = f"https://twitter.com/{tweet.user.screen_name}/status/{tweet.id_str}"
+                except:
+                    pass
+                return_dict.update({
+                    'source_location': source_location,
+                    'urls': url_list,
+                    'expanded_urls': expanded_url_list,
+                    'extracted_urls': self._extract_urls(return_dict['tweet_text'])
+                })
+                return_list.append(return_dict)
         return return_list
