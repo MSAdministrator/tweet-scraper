@@ -152,15 +152,16 @@ class TweetScraper:
         pages = 1
         if count >= 200:
             pages = int(count / 200) + 1
-        for page in tweepy.Cursor(self.api.search,
-                           q=query,
-                           count=count,
-                           result_type="recent",
-                           include_entities=True,
-                           lang="en",
-                           since_id=None if not since_id else since_id,
-                           until=None if not until else until,
-                           tweet_mode="extended").pages(pages):
+        for page in tweepy.Cursor(
+            self.api.search_tweets,
+            q=query,
+            count=count,
+            result_type="recent",
+            include_entities=True,
+            lang="en",
+            since_id=None if not since_id else since_id,
+            until=None if not until else until,
+            tweet_mode="extended").pages(pages):
             for tweet in page:
                 return_dict = {
                     'id': tweet.id,
@@ -200,7 +201,7 @@ class TweetScraper:
                     'source_location': source_location,
                     'urls': url_list,
                     'expanded_urls': expanded_url_list,
-                    'extracted_urls': self._extract_urls(return_dict['tweet_text'])
+                    'extracted_urls': self._extract_urls(return_dict['tweet_text']) if return_dict.get('tweet_text') else None
                 })
                 return_list.append(return_dict)
         return return_list
